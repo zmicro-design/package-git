@@ -1,0 +1,71 @@
+#!/bin/bash
+
+install() {
+  # prepare vars
+  local name="$PACKAGE_CORE_NAME"
+
+  log::info "[$(timestamp)][package][$name] preparing ..."
+
+  # get system os/arch
+  local os="$PACKAGE_OS"
+  local arch="$PACKAGE_OS_ARCH"
+  local kernel="$PACKAGE_OS_KERNEL"
+  local platform="$PACKAGE_OS_PLATFORM"
+  # usr_bin_dir
+  local usr_bin_dir="$PACKAGE_USER_BIN_DIR"
+  local tmp_dir="$PACKAGE_TMP_DIR"
+  
+  # files
+  local tmp_file="$name.tar.gz"
+  local source_bin_file="./${name}-${PACKAGE_CORE_VERSION#v}-${platform}-${arch}/$name"
+  # local target_bin_file="$usr_bin_dir/$name"
+
+  # prepare context
+  cd $tmp_dir
+
+  # install
+  log::info "[$(timestamp)][package][$name] installing ..."
+  # template os
+  case $os in
+  macos)
+    pm install -y git
+    ;;
+  ubuntu)
+    pm install -y git
+    ;;
+  centos)
+    if [ -f "/etc/redhat-release" ]; then
+      # centos 7
+      cat /etc/redhat-release | grep "CentOS Linux release 7" >> /dev/null 2>&1
+      if [ "$?" != "0" ]; then
+        sudo yum install -y https://packages.endpointdev.com/rhel/7/os/x86_64/endpoint-repo.x86_64.rpm
+        sudo yum install -y git
+      fi
+    else
+      pm install -y git
+    fi
+    ;;
+  alpine)
+    pm install -y git
+    ;;
+  archlinux)
+    pm install -y git
+    ;;
+  archlinux)
+    pm install -y git
+    ;;
+  fedora)
+    pm install -y git
+    ;;
+  *)
+    log::error "[$(timestamp)] unsupport os: $os ($(uname -m))"
+    return 1
+    ;;
+  esac
+
+  # clean
+  log::info "[$(timestamp)][package][$name] cleaning ..."
+  rm -rf $tmp_dir
+}
+
+export -f install
